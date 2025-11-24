@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yasu StudyHub - Online Study Web</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#0a0a0f;color:#fff;overflow-x:hidden;transition:background 0.5s,color 0.5s;}
+header{text-align:center;padding:1rem;font-size:1.8rem;background:linear-gradient(90deg,#00f5ff,#7a00ff);
+-webkit-background-clip:text;color:transparent;font-weight:700;}
+button{background:#1a1a2e;border:none;color:#00eaff;padding:0.7rem 1.3rem;border-radius:10px;cursor:pointer;
+transition:all 0.3s;box-shadow:0 0 10px #00eaff80;}
+button:hover{background:#00eaff;color:#0a0a0f;}
+section{display:none;padding:1rem;}
+.active{display:block;animation:fadeIn 0.5s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Login */
+#loginPage{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;text-align:center;}
+#loginPage input,#loginPage select{padding:.7rem 1rem;border:none;border-radius:10px;margin:1rem 0;
+width:250px;background:#111122;color:#fff;text-align:center;box-shadow:0 0 10px #00eaff60;}
+
+/* Navbar */
+nav{display:flex;justify-content:center;gap:1rem;margin:1rem 0;flex-wrap:wrap;}
+
+/* Notes */
+#notes textarea{width:100%;height:150px;border-radius:10px;padding:1rem;background:#111122;color:#fff;
+border:2px solid #00eaff80;resize:none;}
+.note{background:#111122;padding:1rem;border-radius:10px;box-shadow:0 0 10px #00eaff40;margin-top:1rem;}
+.note button{margin-top:10px;background:#ff0033;color:#fff;border:none;border-radius:8px;
+padding:0.4rem 0.8rem;cursor:pointer;box-shadow:0 0 8px #ff003380;transition:all 0.3s;}
+.note button:hover{background:#ff3366;}
+
+/* Quiz */
+#quiz .question{background:#111122;padding:1rem;border-radius:10px;margin-bottom:1rem;box-shadow:0 0 10px #7a00ff60;}
+#quiz button.answer{display:block;width:100%;margin:0.3rem 0;text-align:left;padding:0.6rem 1rem;border-left:5px solid transparent;}
+.correct{background:#004d00;border-left-color:#00ff00;color:#00ff00;}
+.wrong{background:#400000;border-left-color:#ff0000;color:#ff0000;}
+
+/* Planner */
+#planner input{width:70%;padding:0.6rem;border:none;border-radius:10px;outline:none;background:#111122;color:#fff;}
+.task{background:#111122;margin:0.5rem 0;padding:0.5rem 1rem;border-radius:10px;display:flex;
+justify-content:space-between;align-items:center;box-shadow:0 0 10px #00eaff40;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<section id="loginPage" class="active">
+  <h1>👋 Welcome to yasu StudyHub</h1>
+  <p>Enter your details to start learning:</p>
+  <input type="text" id="studentName" placeholder="Enter your name">
+  <input type="date" id="studentDOB">
+  
+  <button onclick="login()">Login</button>
+</section>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;">
+  <header>📚 Yasu</header>
+  <header>study hub</header>
+  <button class="logout-btn" onclick="logout()" style="position:fixed;top:10px;right:10px;background:#ffffff;color:#00eaff;border:none;padding:1rem 1rem;border-radius:10px;">Logout</button>
+
+  <nav>
+    <button onclick="showSection('notes')"> Note Pad</button>
+    <button onclick="showSection('quiz')"> Online Quiz</button>
+    <button onclick="showSection('planner')"> Planner</button>
+  </nav>
+
+  <h3 id="welcomeUser" style="text-align:center;margin-bottom:1rem;"></h3>
+
+  <!-- Notes -->
+  <section id="notes" class="active">
+    <h2> Notes</h2><br>
+    <textarea id="noteInput" placeholder="Write your notes here..."></textarea><br>
+    <button onclick="saveNote()">Save Note</button>
+    <div id="noteList"></div>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz">
+    <h2> Online Quiz </h2><br>
+    <div id="quizBox"></div>
+    <button onclick="loadOnlineQuiz()">🔄 Load New Questions</button>
+  </section>
+
+  <!-- Planner -->
+  <section id="planner">
+    <h2> Study Planner</h2><br>
+    <input type="text" id="taskInput" placeholder="Add a new task...">
+    <button onclick="addTask()">Add</button>
+    <div id="taskList"></div>
+  </section>
+</div>
+
+<script>
+// SECTION CONTROL
+const sections=document.querySelectorAll("#mainApp section");
+function showSection(id){
+  sections.forEach(sec=>sec.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// LOGIN + LOGOUT
+function login(){
+  const name=document.getElementById("studentName").value.trim();
+  const dob=document.getElementById("studentDOB").value;
+  if(!name||!dob)return alert("Please fill in both name and date of birth!");
+  document.getElementById("loginPage").style.display="none";
+  document.getElementById("mainApp").style.display="block";
+  document.getElementById("welcomeUser").textContent=`Welcome, ${name}! 👋`;
+  localStorage.setItem("studentName",name);
+  localStorage.setItem("studentDOB",dob);
+}
+function logout(){
+  localStorage.removeItem("studentName");
+  localStorage.removeItem("studentDOB");
+  document.getElementById("mainApp").style.display="none";
+  document.getElementById("loginPage").style.display="flex";
+}
+window.onload=function(){
+  const savedName=localStorage.getItem("studentName");
+  if(savedName){
+    document.getElementById("loginPage").style.display="none";
+    document.getElementById("mainApp").style.display="block";
+    document.getElementById("welcomeUser").textContent=`Welcome back, ${savedName}! 👋`;
+  }
+};
+
+// NOTES
+function saveNote(){
+  const text=document.getElementById("noteInput").value.trim();
+  if(!text)return alert("Write something!");
+  const note=document.createElement("div");
+  note.className="note";
+  note.innerHTML=`<p>${text}</p><button onclick="deleteNote(this)">Delete</button>`;
+  document.getElementById("noteList").appendChild(note);
+  document.getElementById("noteInput").value="";
+}
+function deleteNote(btn){btn.parentElement.remove();}
+
+// QUIZ (with Green Correct Answer + Next Button)
+async function loadOnlineQuiz(){
+  const quizBox=document.getElementById("quizBox");
+  quizBox.innerHTML="<p>🌐 Loading questions...</p>";
+
+  if(!navigator.onLine){
+    quizBox.innerHTML="<p>❌ No internet connection. Please connect and try again.</p>";
+    return;
+  }
+
+  try{
+    const res=await fetch("https://opentdb.com/api.php?amount=10&type=multiple");
+    const data=await res.json();
+    const decodeHTML=str=>str.replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"')
+      .replace(/&#039;/g,"'").replace(/&amp;/g,"&");
+
+    const questions=data.results.map(q=>({
+      q:decodeHTML(q.question),
+      a:[...q.incorrect_answers.map(decodeHTML),decodeHTML(q.correct_answer)].sort(()=>Math.random()-0.5),
+      correct:decodeHTML(q.correct_answer)
+    }));
+
+    let index=0,score=0;
+
+    function showQuestion(){
+      if(index>=questions.length){
+        quizBox.innerHTML=`<h3> You scored ${score}/${questions.length}</h3><button onclick="loadOnlineQuiz()">🔁 Play Again</button>`;
+        return;
+      }
+
+      const q=questions[index];
+      quizBox.innerHTML=`
+        <div class='question'>
+          <h3>Q${index+1}. ${q.q}</h3>
+          ${q.a.map(a=>`<button class='answer' onclick="checkAns(this,'${a.replace(/'/g,"\\'")}')">${a}</button>`).join("")}
+        </div>
+        <button id="nextBtn" style="display:none;margin:10px;" onclick="nextQuestion()">Next ▶️</button>
+      `;
+    }
+
+    window.checkAns=(btn,ans)=>{
+      const q=questions[index];
+      const allBtns=document.querySelectorAll(".answer");
+      allBtns.forEach(b=>b.disabled=true);
+
+      if(ans===q.correct){
+        btn.classList.add("correct");
+        score++;
+      }else{
+        btn.classList.add("wrong");
+        allBtns.forEach(b=>{
+          if(b.textContent===q.correct)b.classList.add("correct");
+        });
+      }
+      document.getElementById("nextBtn").style.display="inline-block";
+    };
+
+    window.nextQuestion=()=>{
+      index++;
+      showQuestion();
+    };
+
+    showQuestion();
+  }catch(err){
+    quizBox.innerHTML="<p>❌ Failed to load questions. Try again later.</p>";
+  }
+}
+
+// PLANNER (Debugged)
+function addTask(){
+  const taskInput=document.getElementById("taskInput");
+  const task=taskInput.value.trim();
+  if(!task)return alert("Enter a task!");
+
+  const list=document.getElementById("taskList");
+  const div=document.createElement("div");
+  div.className="task";
+
+  const span=document.createElement("span");
+  span.textContent=task;
+
+  const delBtn=document.createElement("button");
+  delBtn.textContent="❌";
+  delBtn.onclick=()=>div.remove();
+
+  div.appendChild(span);
+  div.appendChild(delBtn);
+  list.appendChild(div);
+  taskInput.value="";
+}
+</script>
+</body>
+</html>
